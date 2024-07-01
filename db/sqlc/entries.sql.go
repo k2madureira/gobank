@@ -64,13 +64,22 @@ func (q *Queries) GetEntrie(ctx context.Context, id int64) (Entry, error) {
 	return i, err
 }
 
-const listentries = `-- name: Listentries :many
+const listEntries = `-- name: ListEntries :many
 SELECT id, account_id, amount, create_at FROM entries
-ORDER BY account_id
+WHERE account_id = $1
+ORDER BY id
+LIMIT $2
+OFFSET $3
 `
 
-func (q *Queries) Listentries(ctx context.Context) ([]Entry, error) {
-	rows, err := q.db.Query(ctx, listentries)
+type ListEntriesParams struct {
+	AccountID pgtype.Int8 `json:"account_id"`
+	Limit     int32       `json:"limit"`
+	Offset    int32       `json:"offset"`
+}
+
+func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
+	rows, err := q.db.Query(ctx, listEntries, arg.AccountID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
