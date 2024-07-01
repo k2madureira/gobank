@@ -8,4 +8,4 @@ sql:
         package: "dbbank"
         out: "./db/sqlc"
         emit_json_tags: true
-        sql_package: "pgx/v5"
+        sql_package: "database/sql"

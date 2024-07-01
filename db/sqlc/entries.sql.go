@@ -7,8 +7,7 @@ package dbbank
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const createEntrie = `-- name: CreateEntrie :one
@@ -21,12 +20,12 @@ INSERT INTO entries (
 `
 
 type CreateEntrieParams struct {
-	AccountID pgtype.Int8 `json:"account_id"`
-	Amount    int64       `json:"amount"`
+	AccountID sql.NullInt64 `json:"account_id"`
+	Amount    int64         `json:"amount"`
 }
 
 func (q *Queries) CreateEntrie(ctx context.Context, arg CreateEntrieParams) (Entry, error) {
-	row := q.db.QueryRow(ctx, createEntrie, arg.AccountID, arg.Amount)
+	row := q.db.QueryRowContext(ctx, createEntrie, arg.AccountID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -43,7 +42,7 @@ WHERE id = $1
 `
 
 func (q *Queries) DeleteEntrie(ctx context.Context, id int64) error {
-	_, err := q.db.Exec(ctx, deleteEntrie, id)
+	_, err := q.db.ExecContext(ctx, deleteEntrie, id)
 	return err
 }
 
@@ -53,7 +52,7 @@ WHERE id = $1 LIMIT 1
 `
 
 func (q *Queries) GetEntrie(ctx context.Context, id int64) (Entry, error) {
-	row := q.db.QueryRow(ctx, getEntrie, id)
+	row := q.db.QueryRowContext(ctx, getEntrie, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -73,13 +72,13 @@ OFFSET $3
 `
 
 type ListEntriesParams struct {
-	AccountID pgtype.Int8 `json:"account_id"`
-	Limit     int32       `json:"limit"`
-	Offset    int32       `json:"offset"`
+	AccountID sql.NullInt64 `json:"account_id"`
+	Limit     int32         `json:"limit"`
+	Offset    int32         `json:"offset"`
 }
 
 func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
-	rows, err := q.db.Query(ctx, listEntries, arg.AccountID, arg.Limit, arg.Offset)
+	rows, err := q.db.QueryContext(ctx, listEntries, arg.AccountID, arg.Limit, arg.Offset)
 	if err != nil {
 		return nil, err
 	}
@@ -96,6 +95,9 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err
@@ -115,6 +117,6 @@ type UpdateEntrieParams struct {
 }
 
 func (q *Queries) UpdateEntrie(ctx context.Context, arg UpdateEntrieParams) error {
-	_, err := q.db.Exec(ctx, updateEntrie, arg.ID, arg.Amount)
+	_, err := q.db.ExecContext(ctx, updateEntrie, arg.ID, arg.Amount)
 	return err
 }
