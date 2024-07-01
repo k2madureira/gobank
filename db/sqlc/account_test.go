@@ -49,3 +49,35 @@ func TestGetAccount(t *testing.T) {
 	require.Equal(t, account.CountryCode, findAccount.CountryCode)
 	require.WithinDuration(t, account.CreateAt, findAccount.CreateAt, time.Second)
 }
+
+func TestUpdateAccount(t *testing.T) {
+	account := createRandomAccount(t)
+
+	arg := UpdateAccountParams{
+		ID:      account.ID,
+		Balance: util.RandomMoney(),
+	}
+
+	updatedAccount, err := testQueries.UpdateAccount(context.Background(), arg)
+	require.NoError(t, err)
+	require.NotEmpty(t, updatedAccount)
+
+	require.Equal(t, account.ID, updatedAccount.ID)
+	require.Equal(t, account.Owner, updatedAccount.Owner)
+	require.Equal(t, account.Currency, updatedAccount.Currency)
+	require.Equal(t, arg.Balance, updatedAccount.Balance)
+	require.Equal(t, account.CountryCode, updatedAccount.CountryCode)
+	require.WithinDuration(t, account.CreateAt, updatedAccount.CreateAt, time.Second)
+
+}
+
+func TestDeleteAccount(t *testing.T) {
+	account := createRandomAccount(t)
+	err := testQueries.DeleteAccount(context.Background(), account.ID)
+	require.NoError(t, err)
+
+	findAccount, err := testQueries.GetAccount(context.Background(), account.ID)
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, findAccount)
+}
