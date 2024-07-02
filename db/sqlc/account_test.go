@@ -15,7 +15,7 @@ func createRandomAccount(t *testing.T) Account {
 		Owner:       util.RandomOwner(),
 		Balance:     util.RandomMoney(),
 		Currency:    util.RandomCurrency(),
-		CountryCode: sql.NullInt32{Int32: int32(util.RandomInt(10, 60)), Valid: true},
+		CountryCode: util.RandomInt32(10, 60),
 	}
 
 	account, err := testQueries.CreateAccount(context.Background(), arg)
@@ -80,4 +80,23 @@ func TestDeleteAccount(t *testing.T) {
 	require.Error(t, err)
 	require.EqualError(t, err, sql.ErrNoRows.Error())
 	require.Empty(t, findAccount)
+}
+
+func TestListAccounts(t *testing.T) {
+	for i := 0; i <= 10; i++ {
+		createRandomAccount(t)
+	}
+
+	arg := ListAccountsParams{
+		Limit:  5,
+		Offset: 1,
+	}
+
+	accounts, err := testQueries.ListAccounts(context.Background(), arg)
+	require.NoError(t, err)
+	require.Len(t, accounts, 5)
+
+	for _, account := range accounts {
+		require.NotEmpty(t, account)
+	}
 }

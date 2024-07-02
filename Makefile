@@ -7,11 +7,11 @@ createdb:
 dropdb:
 		docker exec -it estudoPostgreSql dropdb --username=postgres simple_bank
 
-migrateup:
-		migrate -path migrations -database "postgres://password:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose up
+migrationup:
+		migrate -path db/migrations -database "postgres://password:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose up
 
 migrationdown:
-		migrate -path migrations -database "postgres://password:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose down		
+		migrate -path db/migrations -database "postgres://password:postgres@localhost:5432/simple_bank?sslmode=disable" -verbose down		
 
 
 sqlc:
@@ -20,4 +20,4 @@ sqlc:
 test:
 		go test -v -cover ./...		
 
-.PHONY: postgres createdb dropdb migrateup migrationdown sqlc
+.PHONY: postgres createdb dropdb migrationup migrationdown sqlc

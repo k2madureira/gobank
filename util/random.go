@@ -12,6 +12,10 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
+func RandomInt32(min, max int32) int32 {
+	return min + rand.Int31n(max-min+1)
+}
+
 func RandomInt(min, max int64) int64 {
 	return min + rand.Int63n(max-min+1)
 }

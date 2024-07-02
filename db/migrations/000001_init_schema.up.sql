@@ -4,12 +4,12 @@ CREATE TABLE "accounts" (
   "balance" bigint NOT NULL,
   "currency" varchar NOT NULL,
   "create_at" timestamptz NOT NULL DEFAULT 'now()',
-  "country_code" int
+  "country_code" int NOT NULL
 );
 
 CREATE TABLE "entries" (
   "id" bigserial PRIMARY KEY,
-  "account_id" bigint,
+  "account_id" bigint NOT NULL,
   "amount" bigint NOT NULL,
   "create_at" timestamptz NOT NULL DEFAULT 'now()'
 );
@@ -18,7 +18,7 @@ CREATE TABLE "transfers" (
   "id" bigserial PRIMARY KEY,
   "from_account_id" bigint NOT NULL,
   "to_account_id" bigint NOT NULL,
-  "amount" bigint,
+  "amount" bigint NOT NULL,
   "create_at" timestamptz NOT NULL DEFAULT 'now()'
 );
 

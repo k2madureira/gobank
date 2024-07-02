@@ -7,10 +7,9 @@ package dbbank
 
 import (
 	"context"
-	"database/sql"
 )
 
-const createEntrie = `-- name: CreateEntrie :one
+const createEntry = `-- name: CreateEntry :one
 INSERT INTO entries (
   account_id, 
   amount
@@ -19,13 +18,13 @@ INSERT INTO entries (
 ) RETURNING id, account_id, amount, create_at
 `
 
-type CreateEntrieParams struct {
-	AccountID sql.NullInt64 `json:"account_id"`
-	Amount    int64         `json:"amount"`
+type CreateEntryParams struct {
+	AccountID int64 `json:"account_id"`
+	Amount    int64 `json:"amount"`
 }
 
-func (q *Queries) CreateEntrie(ctx context.Context, arg CreateEntrieParams) (Entry, error) {
-	row := q.db.QueryRowContext(ctx, createEntrie, arg.AccountID, arg.Amount)
+func (q *Queries) CreateEntry(ctx context.Context, arg CreateEntryParams) (Entry, error) {
+	row := q.db.QueryRowContext(ctx, createEntry, arg.AccountID, arg.Amount)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -46,13 +45,13 @@ func (q *Queries) DeleteEntrie(ctx context.Context, id int64) error {
 	return err
 }
 
-const getEntrie = `-- name: GetEntrie :one
+const getEntry = `-- name: GetEntry :one
 SELECT id, account_id, amount, create_at FROM entries
 WHERE id = $1 LIMIT 1
 `
 
-func (q *Queries) GetEntrie(ctx context.Context, id int64) (Entry, error) {
-	row := q.db.QueryRowContext(ctx, getEntrie, id)
+func (q *Queries) GetEntry(ctx context.Context, id int64) (Entry, error) {
+	row := q.db.QueryRowContext(ctx, getEntry, id)
 	var i Entry
 	err := row.Scan(
 		&i.ID,
@@ -72,9 +71,9 @@ OFFSET $3
 `
 
 type ListEntriesParams struct {
-	AccountID sql.NullInt64 `json:"account_id"`
-	Limit     int32         `json:"limit"`
-	Offset    int32         `json:"offset"`
+	AccountID int64 `json:"account_id"`
+	Limit     int32 `json:"limit"`
+	Offset    int32 `json:"offset"`
 }
 
 func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Entry, error) {
@@ -105,18 +104,18 @@ func (q *Queries) ListEntries(ctx context.Context, arg ListEntriesParams) ([]Ent
 	return items, nil
 }
 
-const updateEntrie = `-- name: UpdateEntrie :exec
+const updateEntry = `-- name: UpdateEntry :exec
 UPDATE entries
   set amount = $2
 WHERE id = $1
 `
 
-type UpdateEntrieParams struct {
+type UpdateEntryParams struct {
 	ID     int64 `json:"id"`
 	Amount int64 `json:"amount"`
 }
 
-func (q *Queries) UpdateEntrie(ctx context.Context, arg UpdateEntrieParams) error {
-	_, err := q.db.ExecContext(ctx, updateEntrie, arg.ID, arg.Amount)
+func (q *Queries) UpdateEntry(ctx context.Context, arg UpdateEntryParams) error {
+	_, err := q.db.ExecContext(ctx, updateEntry, arg.ID, arg.Amount)
 	return err
 }
