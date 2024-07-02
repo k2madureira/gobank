@@ -19,11 +19,6 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: simple_bank
-        options:
-          --helth-cmd pg_isready
-          --helth-interval 10s
-          --helth-timeout 5s
-          --helth-retries 5
 
     steps:
     - uses: actions/checkout@v4
